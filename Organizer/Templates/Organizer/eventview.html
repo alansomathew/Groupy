@@ -1,0 +1,42 @@
+{% extends 'Organizer/Head.html'%}
+{% load static %}
+{%  block content %}
+<br><br><br><br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="" method="post">
+        {% csrf_token %}
+        <table border="1" align="center" cellpadding="10">
+            <tr>
+                <th>Event Code</th>
+                <th>Rooms Alloted</th>
+                <th>Action</th>
+            </tr>
+            <tr>
+                <td>{{data.code}}</td>
+                <td>{{data.rooms}}</td>
+                <td>
+                    {% if data.status == 1 %}
+                    <p style="color: green;">Event Finished</p>
+                    {% else %}
+                    <p><a href="{% url 'org:editevent' data.id %}">Edit EventCode</a> |
+                      
+                        <a href="{% url 'org:allocate_rooms' data.id %}">Result</a>
+                  
+                         <a href="{% url 'org:finishevent' data.id %}">Finish</a> 
+                         <a href="{% url 'org:status' data.id %}">Status</a></p>
+                {% endif %}
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock content %}

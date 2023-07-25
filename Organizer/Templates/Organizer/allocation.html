@@ -1,0 +1,29 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Allocation</title>
+</head>
+<body>
+    <h1>Room Allocation for Event: {{ event.code }}</h1>
+    <hr>
+
+    {% for participant in participants %}
+        <h2>Participant: {{ participant.user }}</h2>
+        {% if participant.rooms %}
+            <ul>
+                
+            {% for room_name in participant.rooms|split_rooms %}
+                <li>Room Name: {{ room_name }}</li>
+            {% endfor %}
+            
+            </ul>
+        {% else %}
+            <p>No rooms allocated for this participant.</p>
+        {% endif %}
+    {% endfor %}
+
+    <hr>
+    <p>Number of Available Rooms: {{ event.rooms }}</p>
+</body>
+</html>
