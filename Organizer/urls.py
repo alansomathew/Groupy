@@ -14,4 +14,5 @@ urlpatterns = [
      path('algo/', views.algo,name="algo"),
     path('logout/', views.logout,name="logout"),
     path('status/<int:cid>', views.eventstatus,name="status"),
+    path('mannual/<int:pk>', views.manuualy,name="manuualy"),
 ]

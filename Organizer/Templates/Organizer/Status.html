@@ -2,43 +2,87 @@
 {% load static %}
 
 
-{%  block content %}
+{% block content %}
 <br><br><br><br>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
-    <table  align="center" cellpadding="10">
+    <table align="center" cellpadding="10">
         <tr>
             {% for i in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                {{i.number}}
-                {% for j in data %}
-                {% if i.number in j.rooms %}
-               
+                    {{i.number}}
+                    {% for j in data %}
+                    {% if i.number in j.rooms %}
 
-                    <p>{{j.user}}</p>
-                    <a href="">Change Seat</a> 
 
-                  
-                
-                {% endif %}
-                {% endfor %}
-            </div>
+                    <p>{{j.user}} - {{j.id}}
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">
+                            Change Room
+                        </button>
+                    </p>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        aria-hidden="true">
+
+                        <form action="{% url 'org:manuualy' j.id  %}" method="post">
+                            {% csrf_token %}
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Choose room</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% for i in rdata %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                                value="{{i.number}}" id="flexRadioDefault1">
+                                            <label class="form-check-label" for="flexRadioDefault1">
+                                                Group{{i.number}}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+
+
+                    {% endif %}
+                    {% endfor %}
+                </div>
             </td>
             {% if forloop.counter|divisibleby:4 %}
         </tr>
         <tr>
             {% endif %}
             {% endfor %}
-        
+
     </table>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endblock content %}

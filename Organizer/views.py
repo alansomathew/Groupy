@@ -235,3 +235,16 @@ def allocate_rooms(request, event_id):
     return render(request, "Organizer/allocation.html", {'event': event, 'participants':participants,'allocated_rooms': allocated_rooms})
 
 
+def manuualy(request,pk):
+    if request.method == 'POST':
+        participants = participateuser.objects.get(id=pk)
+        print(pk)
+        print(participants.rooms)
+        room=request.POST.get('flexRadioDefault')
+        print(room)
+        participants.rooms=room
+        participants.save()
+        return redirect("org:home")
+    else:
+        return render(request,"Organizer/Status.html",)
+
