@@ -27,7 +27,7 @@
                     {% else %}
                     <p><a href="{% url 'org:editevent' data.id %}">Edit EventCode</a> |
                       
-                        <a href="{% url 'org:allocate_rooms' data.id %}">Result</a>
+                        <a href="{% url 'org:check_and_reassign_rooms' data.id %}">Result</a>
                   
                          <a href="{% url 'org:finishevent' data.id %}">Finish</a> 
                          <a href="{% url 'org:status' data.id %}">Status</a></p>

@@ -4,6 +4,8 @@ from Organizer.models import Room,Event
 import networkx as nx
 from Organizer.templatetags import custom_filters
 from django.shortcuts import get_object_or_404
+import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 # Create your views here.
 def home(request):
@@ -78,9 +80,9 @@ def allocate_groups(request,did):
     mylist=[]
     eventdata=Event.objects.get(id=did)
     eventdata=Event.objects.get(id=did)
-    pdatacount=participateuser.objects.filter(events=eventdata).count()
+    pdatacount=ParticipateUser.objects.filter(events=eventdata).count()
     if pdatacount>0:
-        pdata=participateuser.objects.filter(events=eventdata)
+        pdata=ParticipateUser.objects.filter(events=eventdata)
         roomsdata=Room.objects.filter(events=eventdata)
         for i in roomsdata:
             
@@ -132,9 +134,9 @@ def algo(request):
     mylist=[]
     eventdata=Event.objects.get(id=request.session["eid"])
     
-    pdatacount=participateuser.objects.filter(events=eventdata).count()
+    pdatacount=ParticipateUser.objects.filter(events=eventdata).count()
     if pdatacount>0:
-        pdata=participateuser.objects.filter(events=eventdata)
+        pdata=ParticipateUser.objects.filter(events=eventdata)
         roomsdata=Room.objects.filter(events=eventdata)
         for i in roomsdata:
             
@@ -186,7 +188,7 @@ def algo(request):
     
 def eventstatus(request,cid):
     eventdata=Event.objects.get(id=cid)
-    pdata=participateuser.objects.filter(events=eventdata)
+    pdata=ParticipateUser.objects.filter(events=eventdata)
     roomdata=Room.objects.filter(events=eventdata)
     
     return render(request,"Organizer/Status.html",{'data':pdata,'rdata':roomdata})
@@ -194,7 +196,7 @@ def eventstatus(request,cid):
 
 def allocate_rooms(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    participants = participateuser.objects.filter(events=event)
+    participants = ParticipateUser.objects.filter(events=event)
     rooms = Room.objects.filter(events=event)
 
     # Create a directed graph
@@ -234,10 +236,37 @@ def allocate_rooms(request, event_id):
 
     return render(request, "Organizer/allocation.html", {'event': event, 'participants':participants,'allocated_rooms': allocated_rooms})
 
+def assign_participants_to_rooms(event):
+    # Create a matrix to represent the capacities of the rooms
+    capacities = [room.capacity for room in event.room_set.all()]
+    capacities_matrix = np.array([capacities])
+
+    # Create a matrix to represent the participant preferences (0 or 1 based on interests)
+    participants = event.ParticipateUser_set.all()
+    preferences_matrix = np.zeros((len(participants), len(capacities)), dtype=int)
+    for i, participant in enumerate(participants):
+        rooms_interested = participant.rooms.split(',')
+        for j, room in enumerate(event.room_set.all()):
+            if str(room.id) in rooms_interested:
+                preferences_matrix[i][j] = 1
+
+    # Use the Hungarian algorithm to solve the assignment problem (Max Flow algorithm)
+    row_ind, col_ind = linear_sum_assignment(-preferences_matrix * capacities_matrix)
+    
+    # Update the ParticipateUser model with the assigned rooms
+    for i, participant in enumerate(participants):
+        if i in row_ind:
+            room_index = col_ind[np.where(row_ind == i)][0]
+            participant_room = event.room_set.all()[room_index]
+            participant.assigned_room = participant_room
+            participant.save()
+        else:
+            participant.assigned_room = None
+            participant.save()
 
 def manuualy(request,pk):
     if request.method == 'POST':
-        participants = participateuser.objects.get(id=pk)
+        participants = ParticipateUser.objects.get(id=pk)
         print(pk)
         print(participants.rooms)
         room=request.POST.get('flexRadioDefault')
@@ -248,3 +277,100 @@ def manuualy(request,pk):
     else:
         return render(request,"Organizer/Status.html",)
 
+
+from ast import literal_eval
+import networkx as nx
+
+def check_and_reassign_rooms(request,event_id):
+    event = Event.objects.get(id=event_id)
+
+    # Call the check_and_reassign_rooms function with the event object
+    # Get all the participating users for the event
+    participating_users = ParticipateUser.objects.filter(events=event)
+
+    # Helper function to convert the string representation of rooms to a Python list
+    def parse_rooms(rooms_str):
+        return literal_eval(rooms_str)
+
+    # Gather room preferences for each user and calculate total capacity required
+    room_preferences = {}
+    total_capacity_required = 0
+
+    for user in participating_users:
+        selected_rooms_str = user.rooms
+        selected_rooms = parse_rooms(selected_rooms_str)
+        room_preferences[user.user] = selected_rooms
+        for room_name in selected_rooms:
+            try:
+                room = Room.objects.get(events=event, number=room_name)
+                total_capacity_required += room.capacity
+            except Room.DoesNotExist:
+                # Handle the case when a room matching the query does not exist
+                # For example, log the error or take appropriate actions
+                pass
+
+    # Check if total capacity required exceeds the total capacity of all rooms for the event
+    total_capacity_available = sum(room.capacity for room in Room.objects.filter(events=event))
+    if total_capacity_required <= total_capacity_available:
+        # No capacity violations, everything is fine
+        return
+
+    # If there is a capacity violation, create a directed graph for the flow network using NetworkX
+    G = nx.DiGraph()
+
+    # Add source and sink nodes to the graph
+    G.add_node("source")
+    G.add_node("sink")
+
+    # Add room nodes and capacities to the graph
+    for room in Room.objects.filter(events=event):
+        G.add_node(room.number)
+        G.add_edge("source", room.number, capacity=room.capacity)
+
+    # Add user nodes and capacities to the graph
+    for user in participating_users:
+        G.add_node(user.user)
+        selected_rooms = room_preferences[user.user]
+        for room_name in selected_rooms:
+            try:
+                room = Room.objects.get(events=event, number=room_name)
+                G.add_edge(room_name, user.user, capacity=1)
+            except Room.DoesNotExist:
+                # Handle the case when a room matching the query does not exist
+                # For example, log the error or take appropriate actions
+                pass
+
+    # Add edges from user nodes to the sink with capacity 1
+    for user in participating_users:
+        G.add_edge(user.user, "sink", capacity=1)
+
+    # Find the maximum flow using the Edmonds-Karp algorithm (NetworkX implementation)
+    max_flow_value, max_flow_dict = nx.maximum_flow(G, "source", "sink")
+
+    # Once the maximum flow algorithm is applied and users are reassigned, update the 'rooms' and 'new_rooms' fields
+    ignored_users = set()
+    for user in participating_users:
+        selected_rooms = room_preferences[user.user]
+        new_room_assignment = []
+        for room_name in selected_rooms:
+            try:
+                room = Room.objects.get(events=event, number=room_name)
+                if max_flow_dict[room_name][user.user] == 1:
+                    new_room_assignment.append(room_name)
+                else:
+                    ignored_users.add(user.user)
+            except Room.DoesNotExist:
+                # Handle the case when a room matching the query does not exist
+                # For example, log the error or take appropriate actions
+                pass
+
+        user.new_rooms = ",".join(new_room_assignment)
+        user.save()
+
+    # Mark the ignored users
+    for user in participating_users:
+        if user.user in ignored_users:
+            user.is_ignored = True
+            user.save()
+
+    return render(request, "Organizer/allocation.html", )

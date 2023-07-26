@@ -32,8 +32,8 @@ def participate(request):
             return render(request,"Guest/Event.html",{'mess':1})
         else:
             edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
-            participateuser.objects.create(user=request.POST.get('txtn'),events=edata)
-            ldata=participateuser.objects.filter(user=request.POST.get('txtn')).last()
+            ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata)
+            ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
             ids=edata.id
             idm=ldata.id
             request.session["edata"]=ids
@@ -46,7 +46,7 @@ def interest(request):
     edata=Event.objects.get(id=request.session["edata"])
     gdata=Room.objects.filter(events=edata)
     if request.method=="POST":
-        pdata=participateuser.objects.get(id=request.session["ldata"])
+        pdata=ParticipateUser.objects.get(id=request.session["ldata"])
         pdata.rooms=request.POST.getlist('inte')
         pdata.save()
         return render(request,"Guest/Group.html",{'mess':1})
@@ -54,7 +54,7 @@ def interest(request):
         return render(request,"Guest/Group.html",{'data':gdata})
 
 def groups(request):
-    ldata=participateuser.objects.get(id=request.session["ldata"])
+    ldata=ParticipateUser.objects.get(id=request.session["ldata"])
     #print(ldata)
     if request.GET.get('did')=="yes":
         roomdata=ldata.rooms
@@ -70,7 +70,7 @@ def groups(request):
             return redirect("Guest:interest")
         # gp=room.objects.get(id=request.GET.get('cid'))
         # counts=int(gp.capacity)
-        # dcount=participateuser.objects.filter(rooms=gp).count()
+        # dcount=ParticipateUser.objects.filter(rooms=gp).count()
         # if dcount>counts:
         #     return redirect("Guest:home")
         # else:
