@@ -267,11 +267,14 @@ def assign_participants_to_rooms(event):
 def manuualy(request,pk):
     if request.method == 'POST':
         participants = ParticipateUser.objects.get(id=pk)
-        print(pk)
-        print(participants.rooms)
+
         room=request.POST.get('flexRadioDefault')
-        print(room)
-        participants.rooms=room
+        user=request.POST.get('hidden')
+        my_list = [room]
+
+# Convert the list to a string
+        list_as_string = str(my_list)
+        participants.rooms=list_as_string
         participants.save()
         return redirect("org:home")
     else:
@@ -357,23 +360,24 @@ def check_and_reassign_rooms(request,event_id):
                 room = Room.objects.get(events=event, number=room_name)
                 if max_flow_dict[room_name][user.user] == 1:
                     new_room_assignment.append(room_name)
-                else:
-                    ignored_users.add(user.user)
             except Room.DoesNotExist:
                 # Handle the case when a room matching the query does not exist
                 # For example, log the error or take appropriate actions
                 pass
 
-        user.new_rooms = ",".join(new_room_assignment)
-        user.save()
+        if not new_room_assignment:
+            ignored_users.add(user.user)
+        else:
+            user.new_rooms = ",".join(new_room_assignment)
+            user.save()
 
     # Mark the ignored users
     for user in participating_users:
         if user.user in ignored_users:
             user.is_ignored = True
-            user.save()
+        user.save()
 
-    pdata=ParticipateUser.objects.filter(events=event)
-    roomdata=Room.objects.filter(events=event)
+    pdata = ParticipateUser.objects.filter(events=event)
+    roomdata = Room.objects.filter(events=event)
 
     return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )

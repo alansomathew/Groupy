@@ -48,6 +48,7 @@
                                     <div class="modal-body">
                                         {% for i in rdata %}
                                         <div class="form-check">
+                                            <input type="hidden" name="hidden" value="{{j.id}}">
                                             <input class="form-check-input" type="radio" name="flexRadioDefault"
                                                 value="{{i.number}}" id="flexRadioDefault1">
                                             <label class="form-check-label" for="flexRadioDefault1">
