@@ -373,4 +373,7 @@ def check_and_reassign_rooms(request,event_id):
             user.is_ignored = True
             user.save()
 
-    return render(request, "Organizer/allocation.html", )
+    pdata=ParticipateUser.objects.filter(events=event)
+    roomdata=Room.objects.filter(events=event)
+
+    return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
