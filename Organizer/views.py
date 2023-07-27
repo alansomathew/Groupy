@@ -265,20 +265,13 @@ def assign_participants_to_rooms(event):
             participant.save()
 
 def manuualy(request,pk):
+    event=Event.objects.get(id=pk)
+    participants = ParticipateUser.objects.filter(events=event)
+    users_data = [{'username': user.user, 'rooms_data': [room.strip('\'').strip().lower() for room in user.rooms.strip('[]').split(', ')]} for user in participants]
     if request.method == 'POST':
-        participants = ParticipateUser.objects.get(id=pk)
-
-        room=request.POST.get('flexRadioDefault')
-        user=request.POST.get('hidden')
-        my_list = [room]
-
-# Convert the list to a string
-        list_as_string = str(my_list)
-        participants.rooms=list_as_string
-        participants.save()
-        return redirect("org:home")
+        return render(request,"Organizer/Manually.html",{'users_data':users_data})
     else:
-        return render(request,"Organizer/Status.html",)
+        return render(request,"Organizer/Manually.html",{'users_data':users_data})
 
 
 from ast import literal_eval
