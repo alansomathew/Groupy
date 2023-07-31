@@ -1,4 +1,6 @@
 from django.shortcuts import render,redirect
+from django.urls import reverse
+from urllib.parse import urlencode
 from Guest.models import *
 from Organizer.models import Room,Event
 import networkx as nx
@@ -69,8 +71,11 @@ def finishevent(request,eid):
     data.status=1
     data.save()
     request.session["eid"]=eid
-    return redirect("org:algo")
-
+    # params = urlencode({'event_id': eid})
+    # url = reverse('org:check_and_reassign_rooms') + f'?{params}'
+    # return redirect(url)
+    return redirect(reverse('org:check_and_reassign_rooms', kwargs={'event_id': eid}))
+    
 def logout(request):
     del request.session["oid"]
     return redirect("Guest:home")
