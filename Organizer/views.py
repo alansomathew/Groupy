@@ -75,10 +75,23 @@ def finishevent(request,eid):
     # url = reverse('org:check_and_reassign_rooms') + f'?{params}'
     # return redirect(url)
     return redirect(reverse('org:check_and_reassign_rooms', kwargs={'event_id': eid}))
-    
+
+def deleteevent(request,eid):
+    data=Event.objects.get(id=eid)
+    data.delete()
+    return redirect('org:home')
+
+def reopenevent(request,eid):
+    data=Event.objects.get(id=eid)
+    data.status=0
+    data.save()
+    return redirect('org:home')
+
+
 def logout(request):
     del request.session["oid"]
     return redirect("Guest:home")
+
 def allocate_groups(request,did):
     participents={}
     groups = {}
