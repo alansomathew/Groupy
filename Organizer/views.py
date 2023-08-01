@@ -8,6 +8,7 @@ from Organizer.templatetags import custom_filters
 from django.shortcuts import get_object_or_404
 import numpy as np
 from scipy.optimize import linear_sum_assignment
+from django.contrib import messages
 
 # Create your views here.
 def home(request):
@@ -22,7 +23,12 @@ def events(request):
     if 'oid' in request.session:
         if request.method=="POST":
             data=organiser.objects.get(id=request.session["oid"])
-            Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
+            try:
+                Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
+            except Exception as e:
+                # print(e)
+                messages.error(request, 'Event ID is Repeating Please Try again!')
+                return render(request,"Organizer/Event.html")
             counts=int(request.POST.get('txtn'))
             eventid=Event.objects.filter(org=data).last()
             ids=eventid.id

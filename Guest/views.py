@@ -23,7 +23,7 @@ def login(request):
         else:
             return render(request,"Guest/Login.html",{'mess':error})    
     else:
-        return render(request,"Guest/Login.html")    
+        return render(request,"Guest/Login.html",)    
 
 def participate(request):
     if request.method=="POST":
@@ -49,7 +49,7 @@ def interest(request):
         pdata=ParticipateUser.objects.get(id=request.session["ldata"])
         pdata.rooms=request.POST.getlist('inte')
         pdata.save()
-        return render(request,"Guest/Group.html",{'mess':1})
+        return redirect("Guest:participate")
     else:
         return render(request,"Guest/Group.html",{'data':gdata})
 

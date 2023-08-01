@@ -10,12 +10,13 @@
     <title>Document</title>
 </head>
 <body>
+    <h3 class="text-center fw-bold">Room Capacity</h3>
     <form action="" method="post" id="groupform"  data-group-url="{% url 'Guest:groups'%}">
         {% csrf_token %}
         <table align="center" cellpading="10">
             {% for i in data %}
             <tr>
-                <td>Group{{i.number}} INTERESTED</td>
+                <td>{{i.number}} Interested</td>
                 <td>
                     <input type="checkbox" name="inte" id="" value="{{i.number}}"  class="selc">Yes
                 </td>
