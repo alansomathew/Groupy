@@ -291,11 +291,21 @@ def assign_participants_to_rooms(event):
 def manuualy(request,pk):
     event=Event.objects.get(id=pk)
     participants = ParticipateUser.objects.filter(events=event)
-    users_data = [{'username': user.user, 'rooms_data': [room.strip('\'').strip().lower() for room in user.rooms.strip('[]').split(', ')]} for user in participants]
+    rooms=Room.objects.filter(events=event)
+    print(rooms)
     if request.method == 'POST':
-        return render(request,"Organizer/Manually.html",{'users_data':users_data})
+        for participant in participants:
+            room_name = request.POST.get('room_' + str(participant.id))
+            print(room_name)
+            if room_name:
+                participant.new_rooms = room_name
+                participant.save()
+
+        # Redirect to a success page or any other appropriate URL after saving the room assignments
+        
+        return redirect('org:home')
     else:
-        return render(request,"Organizer/Manually.html",{'users_data':users_data})
+        return render(request,"Organizer/Manually.html",{'users_data':participants,'room':rooms})
 
 
 from ast import literal_eval
