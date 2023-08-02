@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponse
 from django.urls import reverse
 from urllib.parse import urlencode
 from Guest.models import *
@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from django.contrib import messages
+from ast import literal_eval
 
 # Create your views here.
 def home(request):
@@ -211,11 +212,16 @@ def algo(request):
     # return render(request,"Organizer/Home.html")
     
 def eventstatus(request,cid):
-    eventdata=Event.objects.get(id=cid)
-    pdata=ParticipateUser.objects.filter(events=eventdata)
-    roomdata=Room.objects.filter(events=eventdata)
-    
-    return render(request,"Organizer/Status.html",{'data':pdata,'rdata':roomdata})
+    try:    
+        eventdata=Event.objects.get(id=cid)
+        pdata=ParticipateUser.objects.filter(events=eventdata)
+        roomdata=Room.objects.filter(events=eventdata)
+        
+        return render(request,"Organizer/Status.html",{'data':pdata,'rdata':roomdata})
+    except Exception as e:
+        messages.error(request, 'No user is registered for this event!')
+        return render(request, "Organizer/Status.html",{'rdata':roomdata})
+
 
 
 def allocate_rooms(request, event_id):
@@ -308,103 +314,114 @@ def manuualy(request,pk):
         return render(request,"Organizer/Manually.html",{'users_data':participants,'room':rooms})
 
 
-from ast import literal_eval
-import networkx as nx
+
+
 
 def check_and_reassign_rooms(request,event_id):
     event = Event.objects.get(id=event_id)
 
-    # Call the check_and_reassign_rooms function with the event object
-    # Get all the participating users for the event
-    participating_users = ParticipateUser.objects.filter(events=event)
+    roomdata = Room.objects.filter(events=event)
+    try:
 
-    # Helper function to convert the string representation of rooms to a Python list
-    def parse_rooms(rooms_str):
-        return literal_eval(rooms_str)
+        # Call the check_and_reassign_rooms function with the event object
+        # Get all the participating users for the event
+        participating_users = ParticipateUser.objects.filter(events=event)
+        if not participating_users:
+            messages.error(request, 'No user is registered for this event!')
+            return render(request, "Organizer/allocation.html",{'rdata':roomdata} )
 
-    # Gather room preferences for each user and calculate total capacity required
-    room_preferences = {}
-    total_capacity_required = 0
+        # Helper function to convert the string representation of rooms to a Python list
+        def parse_rooms(rooms_str):
+            return literal_eval(rooms_str)
 
-    for user in participating_users:
-        selected_rooms_str = user.rooms
-        selected_rooms = parse_rooms(selected_rooms_str)
-        room_preferences[user.user] = selected_rooms
-        for room_name in selected_rooms:
-            try:
-                room = Room.objects.get(events=event, number=room_name)
-                total_capacity_required += room.capacity
-            except Room.DoesNotExist:
-                # Handle the case when a room matching the query does not exist
-                # For example, log the error or take appropriate actions
-                pass
+        # Gather room preferences for each user and calculate total capacity required
+        room_preferences = {}
+        total_capacity_required = 0
 
-    # Check if total capacity required exceeds the total capacity of all rooms for the event
-    total_capacity_available = sum(room.capacity for room in Room.objects.filter(events=event))
-    if total_capacity_required <= total_capacity_available:
-        # No capacity violations, everything is fine
-        return
+        for user in participating_users:
+            selected_rooms_str = user.rooms
+            selected_rooms = parse_rooms(selected_rooms_str)
+            room_preferences[user.user] = selected_rooms
+            for room_name in selected_rooms:
+                try:
+                    room = Room.objects.get(events=event, number=room_name)
+                    total_capacity_required += room.capacity
+                except Room.DoesNotExist:
+                    # Handle the case when a room matching the query does not exist
+                    # For example, log the error or take appropriate actions
+                    pass
 
-    # If there is a capacity violation, create a directed graph for the flow network using NetworkX
-    G = nx.DiGraph()
+        # Check if total capacity required exceeds the total capacity of all rooms for the event
+        total_capacity_available = sum(room.capacity for room in Room.objects.filter(events=event))
+        if total_capacity_required <= total_capacity_available:
+            # No capacity violations, everything is fine
+            return
 
-    # Add source and sink nodes to the graph
-    G.add_node("source")
-    G.add_node("sink")
+        # If there is a capacity violation, create a directed graph for the flow network using NetworkX
+        G = nx.DiGraph()
 
-    # Add room nodes and capacities to the graph
-    for room in Room.objects.filter(events=event):
-        G.add_node(room.number)
-        G.add_edge("source", room.number, capacity=room.capacity)
+        # Add source and sink nodes to the graph
+        G.add_node("source")
+        G.add_node("sink")
 
-    # Add user nodes and capacities to the graph
-    for user in participating_users:
-        G.add_node(user.user)
-        selected_rooms = room_preferences[user.user]
-        for room_name in selected_rooms:
-            try:
-                room = Room.objects.get(events=event, number=room_name)
-                G.add_edge(room_name, user.user, capacity=1)
-            except Room.DoesNotExist:
-                # Handle the case when a room matching the query does not exist
-                # For example, log the error or take appropriate actions
-                pass
+        # Add room nodes and capacities to the graph
+        for room in Room.objects.filter(events=event):
+            G.add_node(room.number)
+            G.add_edge("source", room.number, capacity=room.capacity)
 
-    # Add edges from user nodes to the sink with capacity 1
-    for user in participating_users:
-        G.add_edge(user.user, "sink", capacity=1)
+        # Add user nodes and capacities to the graph
+        for user in participating_users:
+            G.add_node(user.user)
+            selected_rooms = room_preferences[user.user]
+            for room_name in selected_rooms:
+                try:
+                    room = Room.objects.get(events=event, number=room_name)
+                    G.add_edge(room_name, user.user, capacity=1)
+                except Room.DoesNotExist:
+                    # Handle the case when a room matching the query does not exist
+                    # For example, log the error or take appropriate actions
+                    pass
 
-    # Find the maximum flow using the Edmonds-Karp algorithm (NetworkX implementation)
-    max_flow_value, max_flow_dict = nx.maximum_flow(G, "source", "sink")
+        # Add edges from user nodes to the sink with capacity 1
+        for user in participating_users:
+            G.add_edge(user.user, "sink", capacity=1)
 
-    # Once the maximum flow algorithm is applied and users are reassigned, update the 'rooms' and 'new_rooms' fields
-    ignored_users = set()
-    for user in participating_users:
-        selected_rooms = room_preferences[user.user]
-        new_room_assignment = []
-        for room_name in selected_rooms:
-            try:
-                room = Room.objects.get(events=event, number=room_name)
-                if max_flow_dict[room_name][user.user] == 1:
-                    new_room_assignment.append(room_name)
-            except Room.DoesNotExist:
-                # Handle the case when a room matching the query does not exist
-                # For example, log the error or take appropriate actions
-                pass
+        # Find the maximum flow using the Edmonds-Karp algorithm (NetworkX implementation)
+        max_flow_value, max_flow_dict = nx.maximum_flow(G, "source", "sink")
 
-        if not new_room_assignment:
-            ignored_users.add(user.user)
-        else:
-            user.new_rooms = ",".join(new_room_assignment)
+        # Once the maximum flow algorithm is applied and users are reassigned, update the 'rooms' and 'new_rooms' fields
+        ignored_users = set()
+        for user in participating_users:
+            selected_rooms = room_preferences[user.user]
+            new_room_assignment = []
+            for room_name in selected_rooms:
+                try:
+                    room = Room.objects.get(events=event, number=room_name)
+                    if max_flow_dict[room_name][user.user] == 1:
+                        new_room_assignment.append(room_name)
+                except Room.DoesNotExist:
+                    # Handle the case when a room matching the query does not exist
+                    # For example, log the error or take appropriate actions
+                    pass
+
+            if not new_room_assignment:
+                ignored_users.add(user.user)
+            else:
+                user.new_rooms = ",".join(new_room_assignment)
+                user.save()
+
+        # Mark the ignored users
+        for user in participating_users:
+            if user.user in ignored_users:
+                user.is_ignored = True
             user.save()
 
-    # Mark the ignored users
-    for user in participating_users:
-        if user.user in ignored_users:
-            user.is_ignored = True
-        user.save()
+        pdata = ParticipateUser.objects.filter(events=event)
+        roomdata = Room.objects.filter(events=event)
 
-    pdata = ParticipateUser.objects.filter(events=event)
-    roomdata = Room.objects.filter(events=event)
-
-    return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
+        return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
+    except Exception as e:
+        print('hello')
+        print(e)
+        messages.error(request, 'No user is registered for this event!')
+        return render(request, "Organizer/allocation.html", )
