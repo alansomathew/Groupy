@@ -27,19 +27,20 @@ def events(request):
             data=organiser.objects.get(id=request.session["oid"])
             try:
                 Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
+                counts=int(request.POST.get('txtn'))
+                eventid=Event.objects.filter(org=data).last()
+                ids=eventid.id
+                for i in range(1,counts+1):
+                    names="Group"+str(i)
+                    #print(names)
+                    Room.objects.create(number=names,events=eventid)
+                request.session["events"]=ids
+                return redirect("org:group")
             except Exception as e:
-                # print(e)
+                    # print(e)
                 messages.error(request, 'Event ID is Repeating Please Try again!')
                 return render(request,"Organizer/Event.html")
-            counts=int(request.POST.get('txtn'))
-            eventid=Event.objects.filter(org=data).last()
-            ids=eventid.id
-            for i in range(1,counts+1):
-                names="Group"+str(i)
-                #print(names)
-                Room.objects.create(number=names,events=eventid)
-            request.session["events"]=ids
-            return redirect("org:group")
+            
         else:
             return render(request,"Organizer/Event.html")
     else:
@@ -355,7 +356,7 @@ def ajax_manual(request):
             #     }
         else:
             # The room number is not present in the list of user rooms
-            user_name = userObj.user  # Get the user name from the user object
+            # Get the user name from the user object
             messages.error(request, f"The  room  is not slected by user.")
             response_data = {
                 'message': 'Error',
