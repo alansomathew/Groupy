@@ -70,6 +70,13 @@
 
     {% endblock content %}
 
+    <script>
+        // Automatically close the notification after 5 seconds
+        setTimeout(function() {
+          var notification = document.querySelector('.alert');
+          notification.style.display = 'none';
+        }, 3000);
+      </script>
     
     <!-- Js Plugins -->
     <script src="{% static 'Main/js/jquery-3.3.1.min.js' %}"></script>

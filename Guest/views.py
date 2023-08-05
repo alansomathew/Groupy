@@ -1,6 +1,8 @@
 from django.shortcuts import render,redirect
 from .models import *
 from Organizer.models import *
+from django.contrib import messages
+
 # Create your views here.
 def neworg(request):
     if request.method=="POST":
@@ -27,18 +29,24 @@ def login(request):
 
 def participate(request):
     if request.method=="POST":
-        evntdatacount=Event.objects.filter(code=request.POST.get('txtcode'),status=1).count()
-        if evntdatacount>0:
-            return render(request,"Guest/Event.html",{'mess':1})
-        else:
-            edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
-            ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata)
-            ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
-            ids=edata.id
-            idm=ldata.id
-            request.session["edata"]=ids
-            request.session["ldata"]=idm
-            return redirect("Guest:interest")
+        try:
+            evntdatacount=Event.objects.filter(code=request.POST.get('txtcode'),status=1).count()
+            if evntdatacount>0:
+                return render(request,"Guest/Event.html",{'mess':1})
+            else:
+                edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
+                ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata)
+                ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
+                ids=edata.id
+                idm=ldata.id
+                request.session["edata"]=ids
+                request.session["ldata"]=idm
+                return redirect("Guest:interest")
+            
+        except Exception as e:
+            print(e)
+            messages.error(request,"Event code is not Valid please try with a new one")
+            return render(request,"Guest/Event.html",)
     else:
         return render(request,"Guest/Event.html")
 
