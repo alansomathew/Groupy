@@ -96,7 +96,7 @@
             } else if (data.message === "Error") {
                 // Room is not available, show the error message
                 console.log(data);
-                {% if messages %}
+                
                 {% for message in messages %}
                 // Use the same message code in the HTML page
                 var alertClass = "alert ";
@@ -106,13 +106,13 @@
                     alertClass += "alert-danger";
                 }
 
-                var alertHTML = '<div class="' + alertClass + ' alert-dismissible fade show" data-timeout="3000" role="alert">'
+                var alertHTML = '<div class="alert alert-danger alert-dismissible fade show" data-timeout="3000" role="alert">'
                                + "{{ message }}"
                                + '<button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
                                + '</div>';
                 $("#message-container").html(alertHTML);
                 {% endfor %}
-                {% endif %}
+               
             }
         },
         error: function (xhr, textStatus, errorThrown) {
