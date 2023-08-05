@@ -304,8 +304,11 @@ def manuualy(request,pk):
         for participant in participants:
             room_name = request.POST.get('room_' + str(participant.id))
             print(room_name)
-            if room_name:
-                participant.new_rooms = room_name
+            roomObj=Room.objects.get(id=room_name)
+            roomNumber=roomObj.number
+            print(roomNumber)
+            if roomNumber:
+                participant.new_rooms = roomNumber
                 participant.save()
 
         # Redirect to a success page or any other appropriate URL after saving the room assignments
