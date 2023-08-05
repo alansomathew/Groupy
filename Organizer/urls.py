@@ -14,6 +14,7 @@ urlpatterns = [
     path('deleteevent/<int:eid>', views.deleteevent,name="deleteevent"),
     path('check_and_reassign_rooms/<int:event_id>/', views.check_and_reassign_rooms,name="check_and_reassign_rooms"),
     path('algo/', views.algo,name="algo"),
+    path('result/<int:pk>/', views.result,name="result"),
     path('logout/', views.logout,name="logout"),
     path('status/<int:cid>', views.eventstatus,name="status"),
     path('mannual/<int:pk>', views.manuualy,name="manuualy"),

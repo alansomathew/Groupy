@@ -474,3 +474,29 @@ def check_and_reassign_rooms(request,event_id):
         print(e)
         messages.error(request, 'No user is registered for this event!')
         return render(request, "Organizer/allocation.html", )
+    
+def result(request,pk):
+    event = Event.objects.get(id=pk)
+
+    roomdata = Room.objects.filter(events=event)
+    try:
+
+        # Call the check_and_reassign_rooms function with the event object
+        # Get all the participating users for the event
+        participating_users = ParticipateUser.objects.filter(events=event)
+        if not participating_users:
+            messages.error(request, 'No user is registered for this event!')
+            return render(request, "Organizer/allocation.html",{'rdata':roomdata} )
+
+        # Helper function to convert the string representation of rooms to a Python li
+
+        pdata = ParticipateUser.objects.filter(events=event)
+        roomdata = Room.objects.filter(events=event)
+
+        return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
+    except Exception as e:
+        # print('hello')
+        print(e)
+        messages.error(request, 'No user is registered for this event!')
+        return render(request, "Organizer/allocation.html", )
+    
