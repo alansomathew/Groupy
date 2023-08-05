@@ -327,8 +327,14 @@ def ajax_manual(request):
         # print(user_id)
         roomObj = get_object_or_404(Room, id=selected_value)
         userObj = get_object_or_404(ParticipateUser, id=user_id)
+        event_id=roomObj.events
+        eventObj=get_object_or_404(Event, id=event_id)
+    
+        
 
         room_number = roomObj.number
+        count=ParticipateUser.objects.filter(events=eventObj,new_rooms=room_number).count()
+
         rooms_list = userObj.rooms.strip('[]').replace("'", "").split(', ')
 
         if room_number in rooms_list:
@@ -339,21 +345,21 @@ def ajax_manual(request):
                      'selected_value': selected_value,
                     'user_id': user_id
                 }
-            # if roomObj.capacity > rooms_list.count(room_number):
-            #     # Room is available and capacity is not full
-            #     response_data = {
-            #         'message': 'Success',
-            #         'selected_value': selected_value,
-            #         'user_id': user_id
-            #     }
-            # else:
-            #     # Room is available, but capacity is full
-            #     messages.error(request, f"The selected room  is already full.")
-            #     response_data = {
-            #         'message': 'Error',
-            #         'selected_value': selected_value,
-            #         'user_id': user_id
-            #     }
+            if roomObj.capacity > count:
+                # Room is available and capacity is not full
+                response_data = {
+                    'message': 'Success',
+                    'selected_value': selected_value,
+                    'user_id': user_id
+                }
+            else:
+                # Room is available, but capacity is full
+                messages.error(request, f"The selected room  is already full.")
+                response_data = {
+                    'message': 'Error',
+                    'selected_value': selected_value,
+                    'user_id': user_id
+                }
         else:
             # The room number is not present in the list of user rooms
             # Get the user name from the user object
