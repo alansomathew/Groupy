@@ -330,21 +330,26 @@ def ajax_manual(request):
         if room_number in rooms_list:
             # The room number is present in the list of user rooms
             # Check the capacity of the selected room
-            if roomObj.capacity > rooms_list.count(room_number):
-                # Room is available and capacity is not full
-                response_data = {
-                    'message': 'Success',
-                    'selected_value': selected_value,
+            response_data = {
+                     'message': 'Success',
+                     'selected_value': selected_value,
                     'user_id': user_id
                 }
-            else:
-                # Room is available, but capacity is full
-                messages.error(request, f"The selected room  is already full.")
-                response_data = {
-                    'message': 'Error',
-                    'selected_value': selected_value,
-                    'user_id': user_id
-                }
+            # if roomObj.capacity > rooms_list.count(room_number):
+            #     # Room is available and capacity is not full
+            #     response_data = {
+            #         'message': 'Success',
+            #         'selected_value': selected_value,
+            #         'user_id': user_id
+            #     }
+            # else:
+            #     # Room is available, but capacity is full
+            #     messages.error(request, f"The selected room  is already full.")
+            #     response_data = {
+            #         'message': 'Error',
+            #         'selected_value': selected_value,
+            #         'user_id': user_id
+            #     }
         else:
             # The room number is not present in the list of user rooms
             user_name = userObj.user  # Get the user name from the user object
