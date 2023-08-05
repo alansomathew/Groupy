@@ -17,4 +17,5 @@ urlpatterns = [
     path('logout/', views.logout,name="logout"),
     path('status/<int:cid>', views.eventstatus,name="status"),
     path('mannual/<int:pk>', views.manuualy,name="manuualy"),
+    path('ajax/manual/', views.ajax_manual,name="ajax_manual"),
 ]

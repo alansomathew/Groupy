@@ -10,6 +10,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from django.contrib import messages
 from ast import literal_eval
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
 # Create your views here.
 def home(request):
@@ -313,6 +314,49 @@ def manuualy(request,pk):
     else:
         return render(request,"Organizer/Manually.html",{'users_data':participants,'room':rooms})
 
+
+def ajax_manual(request):
+    if request.method == "GET":
+        selected_value = request.GET.get('selected_value')
+        # print(selected_value)
+        user_id = request.GET.get('user_id')
+        # print(user_id)
+        roomObj = get_object_or_404(Room, id=selected_value)
+        userObj = get_object_or_404(ParticipateUser, id=user_id)
+
+        room_number = roomObj.number
+        rooms_list = userObj.rooms.strip('[]').replace("'", "").split(', ')
+
+        if room_number in rooms_list:
+            # The room number is present in the list of user rooms
+            # Check the capacity of the selected room
+            if roomObj.capacity > rooms_list.count(room_number):
+                # Room is available and capacity is not full
+                response_data = {
+                    'message': 'Success',
+                    'selected_value': selected_value,
+                    'user_id': user_id
+                }
+            else:
+                # Room is available, but capacity is full
+                messages.error(request, f"The selected room  is already full.")
+                response_data = {
+                    'message': 'Error',
+                    'selected_value': selected_value,
+                    'user_id': user_id
+                }
+        else:
+            # The room number is not present in the list of user rooms
+            user_name = userObj.user  # Get the user name from the user object
+            messages.error(request, f"The  room  is not slected by user.")
+            response_data = {
+                'message': 'Error',
+                'selected_value': selected_value,
+                'user_id': user_id
+            }
+
+
+        return JsonResponse(response_data)
 
 
 

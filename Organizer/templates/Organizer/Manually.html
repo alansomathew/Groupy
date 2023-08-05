@@ -26,10 +26,10 @@
                 </td>
 
                 <td>
-                    <select id="room_{{ user_data.id }}" name="room_{{ user_data.id }}">
+                    <select id="room_{{ user_data.id }}" name="room_{{ user_data.id }}"  onchange="onSelectChange(this.value, '{{ user_data.id }}')">
                         <option value="">Select Room</option>
                         {% for room in room %}
-                        <option value="{{ room.number }}" {% if user_data.new_rooms == room.number %}selected {% endif %}>
+                        <option value="{{ room.id }}" {% if user_data.new_rooms == room.number %}selected {% endif %}>
                             {{ room.number }}
                         </option>
                         {% endfor %}
@@ -45,20 +45,87 @@
 
       
     </form>
-        
-    {% if messages %}
-    {% for message in messages %}
-    <div class="alert  {% if message.tags == 'success' %} alert-success {% elif message.tags == 'error' %} alert-danger  {% endif %} alert-dismissible fade show"
-        data-timeout="3000" role="alert">
-        {{message}}
-        <button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
-    {% endif %}
+    <div id="message-container"></div>
+   
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- <script>
+    $(document).ready(function () {
+        // $('.card-link').click(function (e) {
+        //     e.preventDefault();
+        //     // Perform desired action when the link is clicked
+        // });
+
+        $("#room").change(function () {
+            var studentId = $(this).val();
+            alert(studentId)
+            $.ajax({
+                url: '/ajax/manual/',
+                data: { studentId: studentId, },
+                type: 'GET',
+
+                success: function (response) {
+                    $('#resume-section').html(response);
+                },
+                error: function (xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+</script> -->
+<script>
+    function onSelectChange(selectedValue, userId) {
+        // Use the selectedValue and userId to perform your AJAX call
+        // For example, using jQuery AJAX
+        $("#message-container").html(""); 
+        $.ajax({
+            type: "GET",
+            url: "{% url 'org:ajax_manual' %}",  // Replace 'your_ajax_view_url' with the URL of your AJAX view
+            data: {
+                selected_value: selectedValue,
+                user_id: userId
+            },
+            success: function (data) {
+            // Handle the response from the server
+            if (data.message === "Success") {
+                // Room is available, perform actions as needed
+                console.log(data);
+            } else if (data.message === "Error") {
+                // Room is not available, show the error message
+                console.log(data);
+                {% if messages %}
+                {% for message in messages %}
+                // Use the same message code in the HTML page
+                var alertClass = "alert ";
+                if ("{{ message.tags }}" === "success") {
+                    alertClass += "alert-success";
+                } else if ("{{ message.tags }}" === "error") {
+                    alertClass += "alert-danger";
+                }
+
+                var alertHTML = '<div class="' + alertClass + ' alert-dismissible fade show" data-timeout="3000" role="alert">'
+                               + "{{ message }}"
+                               + '<button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+                               + '</div>';
+                $("#message-container").html(alertHTML);
+                {% endfor %}
+                {% endif %}
+            }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            // Handle error if the AJAX call fails
+            console.log(errorThrown);
+        }
+        });
+    }
+    </script>
+    
 </body>
 
 </html>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
 {% endblock content %}
