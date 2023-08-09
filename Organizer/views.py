@@ -357,6 +357,7 @@ def ajax_manual(request):
                 messages.error(request, f"The selected room  is already full.")
                 response_data = {
                     'message': 'Error',
+                    'result':"The selected room  is already full.",
                     'selected_value': selected_value,
                     'user_id': user_id
                 }
@@ -367,6 +368,7 @@ def ajax_manual(request):
             messages.error(request, f"The  room  is not slected by user.")
             response_data = {
                 'message': 'Error',
+                'result':"The  room  is not slected by user.",
                 'selected_value': selected_value,
                 'user_id': user_id
             }

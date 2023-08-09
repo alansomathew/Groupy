@@ -95,23 +95,25 @@
                 console.log(data);
             } else if (data.message === "Error") {
                 // Room is not available, show the error message
-                console.log(data);
-                
-                {% for message in messages %}
+                // console.log(data);
+                var i =0;
+                alert(data.result);
+                // {% for message in messages %}
                 // Use the same message code in the HTML page
-                var alertClass = "alert ";
-                if ("{{ message.tags }}" === "success") {
-                    alertClass += "alert-success";
-                } else if ("{{ message.tags }}" === "error") {
-                    alertClass += "alert-danger";
-                }
+                
+                // var alertClass = "alert ";
+                // if ("{{ message.tags }}" === "success") {
+                //     alertClass += "alert-success";
+                // } else if ("{{ message.tags }}" === "error") {
+                //     alertClass += "alert-danger";
+                // }
 
-                var alertHTML = '<div class="alert alert-danger alert-dismissible fade show" data-timeout="3000" role="alert">'
-                               + "{{ message }}"
-                               + '<button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
-                               + '</div>';
-                $("#message-container").html(alertHTML);
-                {% endfor %}
+                // var alertHTML = '<div class="alert alert-danger alert-dismissible fade show" data-timeout="3000" role="alert">'
+                //                + "{{ message }}"
+                //                + '<button type="button" class="btn btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+                //                + '</div>';
+                // $("#message-container").html(alertHTML);
+                // {% endfor %}
                
             }
         },
