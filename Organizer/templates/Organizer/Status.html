@@ -17,17 +17,23 @@
 <body>
     <table align="center" cellpadding="10">
         <tr>
-            {% for i in rdata %}
+            {% for room in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                    {{i.number}} - capacity {{i.capacity}} 
-                    {% for j in data %}
-                    {% if i.number in j.rooms %}
-
-
-                    <p>{{j.user}} 
+                    {% if room.number in ignored_rooms %}
+                    <p>
+                    {% else %}
+                    <p>
+                    {% endif %}
+                    {{ room.number }} - capacity {{ room.capacity }}
                     </p>
-               
+                    {% for participant in data %}
+                    {% if room.number in participant.rooms %}
+                    {% if room.number in participant.new_rooms %}
+                    <p style="color: red;">{{ participant.user }}</p>
+                    {% else %}
+                    <p>{{ participant.user }}</p>
+                    {% endif %}
                     {% endif %}
                     {% endfor %}
                 </div>
@@ -37,7 +43,6 @@
         <tr>
             {% endif %}
             {% endfor %}
-
     </table>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

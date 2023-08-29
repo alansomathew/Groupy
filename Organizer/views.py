@@ -219,7 +219,11 @@ def eventstatus(request,cid):
         pdata=ParticipateUser.objects.filter(events=eventdata)
         roomdata=Room.objects.filter(events=eventdata)
         
-        return render(request,"Organizer/Status.html",{'data':pdata,'rdata':roomdata})
+        # Calculate the ignored_rooms list
+        ignored_rooms = [room.number for room in roomdata if room.number not in [participant.rooms for participant in pdata]]
+        
+        return render(request, "Organizer/Status.html", {'data': pdata, 'rdata': roomdata, 'ignored_rooms': ignored_rooms})
+
     except Exception as e:
         messages.error(request, 'No user is registered for this event!')
         return render(request, "Organizer/Status.html",{'rdata':roomdata})
