@@ -326,13 +326,17 @@ def ajax_manual(request):
         user_id = request.GET.get('user_id')
         # print(user_id)
         roomObj = get_object_or_404(Room, id=selected_value)
-        userObj = get_object_or_404(ParticipateUser, id=user_id)
+        userObj_f = get_object_or_404(ParticipateUser, id=user_id)
         event_id=roomObj.events
         # eventObj=get_object_or_404(Event, id=event_id)
     
         
 
         room_number = roomObj.number
+        
+        
+        userObj = get_object_or_404(ParticipateUser, id=user_id)
+        
         count=ParticipateUser.objects.filter(events=event_id,new_rooms=room_number).count()
 
         rooms_list = userObj.rooms.strip('[]').replace("'", "").split(', ')
@@ -373,8 +377,8 @@ def ajax_manual(request):
                 'user_id': user_id
             }
        
-
-
+        userObj_f.new_rooms=room_number
+        userObj_f.save()
         return JsonResponse(response_data)
 
 
