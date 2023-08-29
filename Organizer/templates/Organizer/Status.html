@@ -20,7 +20,7 @@
             {% for i in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                    {{i.number}}
+                    {{i.number}} - capacity {{i.capacity}} 
                     {% for j in data %}
                     {% if i.number in j.rooms %}
 
