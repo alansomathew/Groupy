@@ -1,9 +1,9 @@
-{% extends 'Organizer/Head.html'%}
+{% extends 'Organizer/Head.html' %}
 {% load static %}
-
 
 {% block content %}
 <br><br><br><br>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -18,22 +18,18 @@
     <h3 class="text-center fw-bold">Allocated Slot</h3>
     <table align="center" cellpadding="10">
         <tr>
-            {% for i in rdata %}
+            {% for room in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                    {{i.number}}
-                    {% for j in data %}
-                    {% if i.number in j.new_rooms %}
-
-
-                    <p>{{j.user}}
-                    </p>
-                    <!-- Modal -->
-                  
-
-
-
-                    {% endif %}
+                    {{ room.number }}
+                    {% for user in data %}
+                        {% if room.number in user.new_rooms %}
+                            {% if room.number in user.rooms %}
+                                <p>{{ user.user }}</p>
+                            {% else %}
+                                <p style="color: red;">{{ user.user }}</p>
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
                 </div>
             </td>
@@ -42,10 +38,8 @@
         <tr>
             {% endif %}
             {% endfor %}
-
     </table>
-    
-    
 </html>
+
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endblock content %}

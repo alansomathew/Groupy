@@ -2,51 +2,43 @@
 {% load static %}
 
 
-{% block content %}
+{%  block content %}
 <br><br><br><br>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body>
-    <table align="center" cellpadding="10">
+    <table  align="center" cellpadding="10">
         <tr>
-            {% for room in rdata %}
+            {% for i in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                    {% if room.number in ignored_rooms %}
-                    <p>
-                    {% else %}
-                    <p>
-                    {% endif %}
-                    {{ room.number }} - capacity {{ room.capacity }}
-                    </p>
-                    {% for participant in data %}
-                    {% if room.number in participant.rooms %}
-                    {% if room.number in participant.new_rooms %}
-                    <p style="color: red;">{{ participant.user }}</p>
-                    {% else %}
-                    <p>{{ participant.user }}</p>
-                    {% endif %}
-                    {% endif %}
-                    {% endfor %}
-                </div>
+                {{i.number}} 
+                {% for j in data %}
+                {% if i.number in j.rooms %}
+
+
+                    <p>{{j.user}}</p>
+
+
+
+
+                {% endif %}
+                {% endfor %}
+            </div>
             </td>
             {% if forloop.counter|divisibleby:4 %}
         </tr>
         <tr>
             {% endif %}
             {% endfor %}
-    </table>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
+    </table>
+</body>
 </html>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endblock content %}
