@@ -499,6 +499,7 @@ def result(request, pk):
     event = Event.objects.get(id=pk)
 
     roomdata = Room.objects.filter(events=event)
+    print(roomdata)
     try:
         # Call the check_and_reassign_rooms function with the event object
         # check_and_reassign_rooms(request, event.id)
@@ -511,7 +512,21 @@ def result(request, pk):
             return render(request, "Organizer/allocation.html",{'rdata':roomdata} )
 
         allocated_users = participating_users.exclude(new_rooms="")
+        # print(allocated_users)
         ignored_users = participating_users.filter(new_rooms="", rooms__isnull=False)
+
+        exceeded_groups = []  # List to store exceeded group numbers
+
+        
+        for room in roomdata:
+            user_count = 0
+            for user in allocated_users:
+                if user.new_rooms and room.number in user.new_rooms:
+                    user_count += 1
+
+            if user_count > room.capacity:
+                exceeded_groups.append(room.number)   # Add exceeded group number
+
 
         message = ""
 
@@ -522,11 +537,19 @@ def result(request, pk):
         else:
             message = "No participants are registered for this event!"
 
+        if exceeded_groups:
+            exceeded_groups_message = ", ".join(exceeded_groups)
+            e_message = f" Groups {exceeded_groups_message} have exceeded their room capacity."
+        else:
+            e_message="All room with with in the capacity"
+
         context = {
             'data': allocated_users,
             'rdata': roomdata,
             'message': message,
             'unallocated': unallocated,
+            'e_message': e_message,
+
         }
 
         return render(request, "Organizer/allocation.html", context)

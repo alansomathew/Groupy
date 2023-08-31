@@ -60,31 +60,13 @@
         <p>{{ message }}</p>
     </div>
     {% endif %}
-    {% for room in rdata %}
-    {% with total_capacity=0 %}
-        {% with user_count=0 %}
-            {% for user in data %}
-                {% if user.new_rooms %}
-                    {% if room.number in user.new_rooms %}
-                        {% for r in rdata %}
-                            {% if r.number == room.number %}
-                                {% with total_capacity=total_capacity|add:r.capacity %}
-                                {% endwith %}
-                            {% endif %}
-                        {% endfor %}
-                        {% with user_count=user_count|add:1 %}
-                        {% endwith %}
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        {% endwith %}
-    {% endwith %}
-    {% if total_capacity > room.capacity or user_count > room.capacity %}
-    <div class=" alert-danger">
-        <p>Room {{ room.number }} (Group Exceeded Capacity: {{ user_count }}/{{ room.capacity }})</p>
-    </div>
-{% endif %}
-{% endfor %}
+    {% if e_message %}
+        <div class="{% if e_message %} alert-warning{% else %}alert-success{% endif %}">
+            <p>{{e_message}}</p>
+        </div>
+    {% endif %}
+
+
 
 </html>
 
