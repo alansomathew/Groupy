@@ -505,6 +505,7 @@ def result(request, pk):
 
         # Get all the participating users for the event
         participating_users = ParticipateUser.objects.filter(events=event)
+        unallocated = ParticipateUser.objects.filter(events=event,new_rooms="")
         if not participating_users:
             messages.error(request, 'No user is registered for this event!')
             return render(request, "Organizer/allocation.html",{'rdata':roomdata} )
@@ -525,6 +526,7 @@ def result(request, pk):
             'data': allocated_users,
             'rdata': roomdata,
             'message': message,
+            'unallocated': unallocated,
         }
 
         return render(request, "Organizer/allocation.html", context)

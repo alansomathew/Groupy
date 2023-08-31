@@ -21,7 +21,7 @@
             {% for room in rdata %}
             <td>
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                    {{ room.number }}
+                    {{ room.number }} - capacity : {{ room.capacity }}
                     {% for user in data %}
                         {% if room.number in user.new_rooms %}
                             {% if room.number in user.rooms %}
@@ -38,14 +38,53 @@
         <tr>
             {% endif %}
             {% endfor %}
+
+            <tr>
+                {% for i in unallocated %}
+                <td>
+                    <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
+                        {{ i.user }}
+                    </div>
+                </td>
+                {% if forloop.counter|divisibleby:4 %}
+                </tr>
+                <tr>
+                    {% endif %}
+                    {% endfor %}
+
+            </tr>
     </table>
   
     {% if message %}
-    <div class="alert {% if ignored_users %}alert-danger{% else %}alert-success{% endif %}">
+    <div class=" {% if ignored_users %}alert-danger{% else %}alert-success{% endif %}">
         <p>{{ message }}</p>
     </div>
     {% endif %}
-
+    {% for room in rdata %}
+    {% with total_capacity=0 %}
+        {% with user_count=0 %}
+            {% for user in data %}
+                {% if user.new_rooms %}
+                    {% if room.number in user.new_rooms %}
+                        {% for r in rdata %}
+                            {% if r.number == room.number %}
+                                {% with total_capacity=total_capacity|add:r.capacity %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                        {% with user_count=user_count|add:1 %}
+                        {% endwith %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        {% endwith %}
+    {% endwith %}
+    {% if total_capacity > room.capacity or user_count > room.capacity %}
+    <div class=" alert-danger">
+        <p>Room {{ room.number }} (Group Exceeded Capacity: {{ user_count }}/{{ room.capacity }})</p>
+    </div>
+{% endif %}
+{% endfor %}
 
 </html>
 
