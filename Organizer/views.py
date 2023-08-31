@@ -472,11 +472,12 @@ def check_and_reassign_rooms(request,event_id):
                     # For example, log the error or take appropriate actions
                     pass
 
-            if not new_room_assignment:
-                ignored_users.add(user.user)
-            else:
+            if  new_room_assignment:
                 user.new_rooms = ",".join(new_room_assignment)
                 user.save()
+            else:
+                ignored_users.add(user.user)
+                
 
         # Mark the ignored users
         for user in participating_users:
@@ -494,28 +495,42 @@ def check_and_reassign_rooms(request,event_id):
         messages.error(request, 'No user is registered for this event!')
         return render(request, "Organizer/allocation.html", )
     
-def result(request,pk):
+def result(request, pk):
     event = Event.objects.get(id=pk)
 
     roomdata = Room.objects.filter(events=event)
     try:
-
         # Call the check_and_reassign_rooms function with the event object
+        # check_and_reassign_rooms(request, event.id)
+
         # Get all the participating users for the event
         participating_users = ParticipateUser.objects.filter(events=event)
         if not participating_users:
             messages.error(request, 'No user is registered for this event!')
             return render(request, "Organizer/allocation.html",{'rdata':roomdata} )
 
-        # Helper function to convert the string representation of rooms to a Python li
+        allocated_users = participating_users.exclude(new_rooms="")
+        ignored_users = participating_users.filter(new_rooms="", rooms__isnull=False)
 
-        pdata = ParticipateUser.objects.filter(events=event)
-        roomdata = Room.objects.filter(events=event)
+        message = ""
 
-        return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
+        if ignored_users:
+            message = "Some participants were ignored due to room capacity constraints."
+        elif allocated_users:
+            message = "All participants registered for this event have been allocated rooms."
+        else:
+            message = "No participants are registered for this event!"
+
+        context = {
+            'data': allocated_users,
+            'rdata': roomdata,
+            'message': message,
+        }
+
+        return render(request, "Organizer/allocation.html", context)
     except Exception as e:
-        # print('hello')
         print(e)
-        messages.error(request, 'No user is registered for this event!')
-        return render(request, "Organizer/allocation.html", )
+        messages.error(request, 'An error occurred while processing allocations!')
+        return render(request, "Organizer/allocation.html", {'rdata': roomdata})
+
     

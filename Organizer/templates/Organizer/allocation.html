@@ -39,6 +39,14 @@
             {% endif %}
             {% endfor %}
     </table>
+  
+    {% if message %}
+    <div class="alert {% if ignored_users %}alert-danger{% else %}alert-success{% endif %}">
+        <p>{{ message }}</p>
+    </div>
+    {% endif %}
+
+
 </html>
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
