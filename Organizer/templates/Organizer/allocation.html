@@ -16,6 +16,7 @@
 
 <body>
     <h3 class="text-center fw-bold">Allocated Slot</h3>
+    
     <table align="center" cellpadding="10">
         <tr>
             {% for room in rdata %}
@@ -23,13 +24,13 @@
                 <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
                     {{ room.number }} - capacity : {{ room.capacity }}
                     {% for user in data %}
-                        {% if room.number in user.new_rooms %}
-                            {% if room.number in user.rooms %}
-                                <p>{{ user.user }}</p>
-                            {% else %}
-                                <p style="color: red;">{{ user.user }}</p>
-                            {% endif %}
-                        {% endif %}
+                    {% if room.number in user.new_rooms %}
+                    {% if room.number in user.rooms %}
+                    <p>{{ user.user }}</p>
+                    {% else %}
+                    <p style="color: red;">{{ user.user }}</p>
+                    {% endif %}
+                    {% endif %}
                     {% endfor %}
                 </div>
             </td>
@@ -38,32 +39,38 @@
         <tr>
             {% endif %}
             {% endfor %}
+            {% if unallocated%}
+        <tr>
+            <td>
+                <p class="text-warning"> Unallocated Users</p>
 
-            <tr>
                 {% for i in unallocated %}
-                <td>
-                    <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
-                        {{ i.user }}
-                    </div>
-                </td>
-                {% if forloop.counter|divisibleby:4 %}
-                </tr>
-                <tr>
-                    {% endif %}
-                    {% endfor %}
 
-            </tr>
+
+                <div style="text-align:center;border:1px solid black;margin:22px;padding:20px">
+                    {{ i.user }}
+                </div>
+
+
+                {% endfor %}
+            </td>
+
+        </tr>
+        {% endif %}
     </table>
-  
+    <div class="col-md-12 d-flex mb-3 end-0 "><span class="bg-danger p-2 mx-2 mt-2 float-end" style="height: 3px;"> </span>
+        <p class="float-end"> preferences violated users</p>
+    </div>
+
     {% if message %}
     <div class=" {% if ignored_users %}alert-danger{% else %}alert-success{% endif %}">
         <p>{{ message }}</p>
     </div>
     {% endif %}
     {% if e_message %}
-        <div class="{% if e_message %} alert-warning{% else %}alert-success{% endif %}">
-            <p>{{e_message}}</p>
-        </div>
+    <div class="{% if e_message %} alert-warning{% else %}alert-success{% endif %}">
+        <p>{{e_message}}</p>
+    </div>
     {% endif %}
 
 

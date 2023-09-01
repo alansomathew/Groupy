@@ -539,9 +539,9 @@ def result(request, pk):
 
         if exceeded_groups:
             exceeded_groups_message = ", ".join(exceeded_groups)
-            e_message = f" Groups {exceeded_groups_message} have exceeded their room capacity."
+            e_message = f"  {exceeded_groups_message} have exceeded their room capacity."
         else:
-            e_message="All room with with in the capacity"
+            e_message="All rooms with in the capacity"
 
         context = {
             'data': allocated_users,
