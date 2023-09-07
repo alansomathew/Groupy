@@ -299,6 +299,9 @@ def assign_participants_to_rooms(event):
 
 def manuualy(request,pk):
     event=Event.objects.get(id=pk)
+    eventdata=Event.objects.get(id=pk)
+    pdata=ParticipateUser.objects.filter(events=eventdata)
+    roomdata=Room.objects.filter(events=eventdata)
     participants = ParticipateUser.objects.filter(events=event)
     rooms=Room.objects.filter(events=event)
     print(rooms)
@@ -317,7 +320,7 @@ def manuualy(request,pk):
         
         return redirect('org:home')
     else:
-        return render(request,"Organizer/Manually.html",{'users_data':participants,'room':rooms})
+        return render(request,"Organizer/Manually.html",{'users_data':participants,'room':rooms,'data': pdata, 'rdata': roomdata,})
 
 
 def ajax_manual(request):
