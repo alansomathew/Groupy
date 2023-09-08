@@ -35,7 +35,7 @@ def events(request):
             data=organiser.objects.get(id=request.session["oid"])
             try:
                 is_private=request.POST.get('txt_private')
-                totl_Cap=int(request.POST.get('txttotal'))
+                
                 if is_private == 'public':
                     Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
                     counts=int(request.POST.get('txtn'))
@@ -48,6 +48,7 @@ def events(request):
                     request.session["events"]=ids
                     return redirect("org:group")
                 else:
+                    totl_Cap=int(request.POST.get('txttotal'))
                     Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data,is_private=True,tot_capacity=totl_Cap)
                     counts=int(request.POST.get('txtn'))
                     eventid=Event.objects.filter(org=data).last()
