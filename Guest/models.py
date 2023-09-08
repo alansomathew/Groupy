@@ -12,12 +12,6 @@ class ParticipateUser(models.Model):
     events=models.ForeignKey(Event,on_delete=models.CASCADE)
     rooms=models.TextField(max_length=50,default="")
     new_rooms = models.TextField(max_length=50, default="")
+    privatecode = models.TextField(max_length=50, default="")
     is_ignored = models.BooleanField(default=False)
 
-class ParticipatePrivateUser(models.Model):
-    user=models.CharField(max_length=50)
-    events=models.ForeignKey(PrivateEvent,on_delete=models.CASCADE)
-    rooms=models.TextField(max_length=50,default="")
-    new_rooms = models.TextField(max_length=50, default="")
-    is_ignored = models.BooleanField(default=False)
-    code=models.ForeignKey(PrivateCodes,on_delete=models.CASCADE)

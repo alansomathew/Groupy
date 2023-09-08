@@ -11,10 +11,12 @@
 </head>
 <body bgcolor="cyan">
     <h3 class="text-center fw-bold">Room Capacity</h3>
-    <form action="" method="post" id="groupform" data-group-url="{% url 'org:capacity'%}">
+    <form action="" method="post" id="groupform" data-group-url="{% url 'org:capacity'%}" onsubmit="return validateCapacity()">
         {% csrf_token %}
         <table align="center" cellpadding="10">
+           <input type="hidden" name="txttotal" id="txttotal" value="{{event.tot_capacity}}">
             {% for i in room %}
+
              <tr>
                 <td>Group{{forloop.counter}}</td>
                 <td><select name="selc" class="selc">
@@ -48,7 +50,7 @@
              </tr>  
              {% endfor %} 
              <tr>
-                <td colspan="2" align="right"><input type="submit" value="Next" name="btn"></td>
+                <td colspan="2" align="right"><input type="submit" value="Next" id="submit" name="btn"></td>
              </tr>
         </table>
         {% if mess %}
@@ -73,8 +75,29 @@
                
             },
         });
-       
     });
+
+    function validateCapacity() {
+        var totalCapacity = parseInt(document.getElementById("txttotal").value);
+        var selectedOptions = document.querySelectorAll(".selc");
+        var selectedCapacity = 0;
+
+        // Calculate the sum of selected capacities
+        selectedOptions.forEach(function (option) {
+            var capacity = parseInt(option.value.split(",")[0]);
+            selectedCapacity += capacity;
+        });
+
+        // Check if the selected capacity exceeds the total capacity
+        if (totalCapacity !== null && selectedCapacity > totalCapacity) {
+            alert("Total capacity exceeded. Please adjust the group capacities.");
+            return false; // Cancel form submission
+        }
+
+        return true; // Allow form submission
+    }
 </script>
+
+
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endblock content %}

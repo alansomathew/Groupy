@@ -1,0 +1,40 @@
+{% extends 'Organizer/Head.html'%}
+{% load static %}
+{% block content %}
+<br><br><br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form action="" method="post">
+        {% csrf_token %}
+
+        <div class="col-md-12 text-center">
+            <span>Event Code: {{event.code}} </span>
+            <span>Total capacity: {{event.tot_capacity}}</span>
+        </div>
+        <table border="1" align="center" cellpadding="10">
+            <tr>
+                <th>#</th>
+                <th>Code</th>
+            </tr>
+            {% for i in data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ i.code }}</td>
+                
+            </tr>
+            {% endfor %}
+        </table>
+    </form>
+</body>
+
+</html>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock content %}

@@ -1,3 +1,6 @@
+import math
+import random
+import string
 from django.shortcuts import render,redirect,HttpResponse
 from django.urls import reverse
 from urllib.parse import urlencode
@@ -11,7 +14,7 @@ from scipy.optimize import linear_sum_assignment
 from django.contrib import messages
 from ast import literal_eval
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-
+OTPdigits = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 # Create your views here.
 def home(request):
     if 'oid' in request.session:
@@ -20,22 +23,45 @@ def home(request):
         return render(request,"Organizer/Home.html",{'data':evendata})
     else:
         return redirect("Guest:login")
+    
+def generate_code():
+    characters = string.ascii_letters + string.digits
+    code = ''.join(random.choice(characters) for _ in range(6))
+    return code
 
 def events(request):
     if 'oid' in request.session:
         if request.method=="POST":
             data=organiser.objects.get(id=request.session["oid"])
             try:
-                Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
-                counts=int(request.POST.get('txtn'))
-                eventid=Event.objects.filter(org=data).last()
-                ids=eventid.id
-                for i in range(1,counts+1):
-                    names="Group"+str(i)
-                    #print(names)
-                    Room.objects.create(number=names,events=eventid)
-                request.session["events"]=ids
-                return redirect("org:group")
+                is_private=request.POST.get('txt_private')
+                totl_Cap=int(request.POST.get('txttotal'))
+                if is_private == 'public':
+                    Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data)
+                    counts=int(request.POST.get('txtn'))
+                    eventid=Event.objects.filter(org=data).last()
+                    ids=eventid.id
+                    for i in range(1,counts+1):
+                        names="Group"+str(i)
+                        #print(names)
+                        Room.objects.create(number=names,events=eventid)
+                    request.session["events"]=ids
+                    return redirect("org:group")
+                else:
+                    Event.objects.create(code=request.POST.get('txtcode'),rooms=request.POST.get('txtn'),org=data,is_private=True,tot_capacity=totl_Cap)
+                    counts=int(request.POST.get('txtn'))
+                    eventid=Event.objects.filter(org=data).last()
+                    ids=eventid.id
+                    for i in range(1,counts+1):
+                        names="Group"+str(i)
+                        #print(names)
+                        Room.objects.create(number=names,events=eventid)
+                    code = ""
+                    for j in range(totl_Cap):
+                        code = generate_code()
+                        PrivateCodes.objects.create(event=eventid, code=code)
+                    request.session["events"]=ids
+                    return redirect("org:group")
             except Exception as e:
                     # print(e)
                 messages.error(request, 'Event ID is Repeating Please Try again!')
@@ -52,7 +78,7 @@ def group(request):
     if request.method=="POST":
         return render(request,"Organizer/Group.html",{'mess':1})
     else:
-        return render(request,"Organizer/Group.html",{'room':roomdata})
+        return render(request,"Organizer/Group.html",{'room':roomdata,'event':eventadta})
 
 def capacity(request):
     data=request.GET.get('did')
@@ -561,4 +587,10 @@ def result(request, pk):
         messages.error(request, 'An error occurred while processing allocations!')
         return render(request, "Organizer/allocation.html", {'rdata': roomdata})
 
-    
+
+def view_code(request,pk):
+    event = Event.objects.get(id=int(pk))
+    data=PrivateCodes.objects.filter(event=pk)
+    return render(request,"Organizer/viewcode.html",{'data':data,'event':event})
+   
+

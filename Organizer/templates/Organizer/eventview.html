@@ -26,18 +26,25 @@
                 <td>
                     {% if data.status == 1 %}
                     <a href="{% url 'org:status' data.id %}">Status</a> |
+                    {% if data.is_private %}
+                    <a href="{% url 'org:view_code' data.id %}">Viewcode</a> |
+                    {% endif %}
                     <a href="{% url 'org:result' data.id %}">Result</a> |
                     <a href="{% url 'org:manuualy' data.id %}">Edit Result</a> |
                     <a href="{% url 'org:reopen' data.id %}">Re Open Event</a> |
-                    <a href="{% url 'org:deleteevent' data.id %}">Delete Event</a> 
+                    <a href="{% url 'org:deleteevent' data.id %}">Delete Event</a>
                     {% else %}
                     <p>
                         <a href="{% url 'org:editevent' data.id %}">Edit EventCode</a> |
+                        {% if data.is_private %}
+                        <a href="{% url 'org:view_code' data.id %}">Viewcode</a> |
+                        {% endif %}
                         <a href="{% url 'org:status' data.id %}">Status</a> |
-                     <a href="{% url 'org:result' data.id %}">Result</a> |
-                     <a href="{% url 'org:manuualy' data.id %}">Edit Result</a> |
-                    <a href="{% url 'org:finishevent' data.id %}">Finish</a>
-                </p>
+                        <a href="{% url 'org:result' data.id %}">Result</a> |
+                        <a href="{% url 'org:manuualy' data.id %}">Edit Result</a> |
+                        <a href="{% url 'org:finishevent' data.id %}">Finish</a>
+                      
+                    </p>
 
                     {% endif %}
                 </td>

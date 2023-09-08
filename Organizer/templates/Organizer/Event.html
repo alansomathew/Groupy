@@ -22,6 +22,18 @@
                 <td><input type="number" name="txtn" id="" required=""></td>
             </tr>
             <tr>
+                <td>NUMBER OF ROOMS NEEDED</td>
+                <td>
+                    <input type="radio" name="txt_private" id="public" value="public" required="required">Public
+                    <input type="radio" name="txt_private" id="private" value="private" required="required">Private
+                </td>
+            </tr>
+            
+            <tr id="totalCapacityRow" style="display: none;">
+                <td>Total capacity</td>
+                <td><input type="number" name="txttotal" id="txttotal"></td>
+            </tr>
+            <tr>
                 <td colspan="2" align="right"><input type="submit" value="Next" name="btn"></td>
             </tr>
         </table>
@@ -36,6 +48,28 @@
     {% endfor %}
     {% endif %}
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const privateRadio = document.getElementById('private');
+        const totalCapacityRow = document.getElementById('totalCapacityRow');
+
+        privateRadio.addEventListener('change', function() {
+            if (this.checked) {
+                totalCapacityRow.style.display = 'table-row';
+            } else {
+                totalCapacityRow.style.display = 'none';
+            }
+        });
+
+        const publicRadio = document.getElementById('public');
+
+        publicRadio.addEventListener('change', function() {
+            if (this.checked) {
+                totalCapacityRow.style.display = 'none';
+            }
+        });
+    });
+</script>
 </html>
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 {% endblock content %}
