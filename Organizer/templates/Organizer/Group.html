@@ -91,7 +91,7 @@
         // Check if the selected capacity exceeds the total capacity
         if (totalCapacity !== null && selectedCapacity > totalCapacity) {
             alert("Total capacity exceeded. Please adjust the group capacities.");
-            return false; // Cancel form submission
+            return true; // Allow form submission
         }
 
         return true; // Allow form submission

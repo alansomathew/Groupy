@@ -34,14 +34,42 @@ def participate(request):
             if evntdatacount>0:
                 return render(request,"Guest/Event.html",{'mess':1})
             else:
-                edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
-                ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata)
-                ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
-                ids=edata.id
-                idm=ldata.id
-                request.session["edata"]=ids
-                request.session["ldata"]=idm
-                return redirect("Guest:interest")
+                is_private=request.POST.get('txt_private')
+                
+                if is_private == 'public':
+                    edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
+                    ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata)
+                    ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
+                    ids=edata.id
+                    idm=ldata.id
+                    request.session["edata"]=ids
+                    request.session["ldata"]=idm
+                    return redirect("Guest:interest")
+                else:
+                    # print(is_private)
+                    edata=Event.objects.get(code=request.POST.get('txtcode'),status=0)
+                    privatecode=request.POST.get('txttotal')
+                    userObjC=ParticipateUser.objects.filter(privatecode=privatecode).count()
+                    if (userObjC>0 ):
+                        userObj=ParticipateUser.objects.get(privatecode=privatecode).count()  
+                        eid=edata.id
+                        uid=userObj.id
+                        request.session["eventId"]=eid
+                        request.session["userId"]=uid
+                        return redirect("Guest:interest")
+                                  
+                    else:
+                        pObj=PrivateCodes.object.get(event=edata,code=privatecode)
+                        if pObj:
+                            return render(request,"Guest/Event.html",{'mess':3})
+                        pCode=pObj.code
+                        ParticipateUser.objects.create(user=request.POST.get('txtn'),events=edata,privatecode=pCode)
+                        ldata=ParticipateUser.objects.filter(user=request.POST.get('txtn')).last()
+                        ids=edata.id
+                        idm=ldata.id
+                        request.session["edata"]=ids
+                        request.session["ldata"]=idm
+                        return redirect("Guest:interest")
             
         except Exception as e:
             print(e)
