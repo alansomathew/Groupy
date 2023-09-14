@@ -12,6 +12,9 @@
 </head>
 
 <body>
+
+    
+ <div class="" id="print-section">
     <form action="" method="post">
         {% csrf_token %}
 
@@ -33,6 +36,27 @@
             {% endfor %}
         </table>
     </form>
+ </div>
+    <div class="col-md-12 float-end">
+        <button class="d-flex btn btn-danger float-end " onclick="printSection('print-section')">
+            Print
+        </button>
+    </div>
+    
+    <script>
+      function printSection(sectionId) {
+    var printContent = document.getElementById(sectionId).innerHTML;
+    var originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = printContent;
+
+    window.print();
+
+    document.body.innerHTML = originalContent;
+}
+
+    </script>
+    
 </body>
 
 </html>

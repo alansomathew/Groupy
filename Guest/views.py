@@ -64,11 +64,11 @@ def participate(request):
                             user_exists = ParticipateUser.objects.filter(privatecode=private_code, user=username).exists()
                             if user_exists:
                                 messages.warning(request, 'You have already registered for this event with the same private code.')
-                                ldata=ParticipateUser.objects.filter(user=username, events=event, privatecode=private_code).last()
-                                ids=event.id
-                                idm=ldata.id
-                                request.session["event_id"]=ids
-                                request.session["user_id"]=idm
+                                userObj=ParticipateUser.objects.get(user=username, events=event, privatecode=private_code)
+                                eId=event.id
+                                uId=userObj.id
+                                request.session["event_id"]=eId
+                                request.session["user_id"]=uId
                                 return redirect("Guest:change_interest")
                             else:
                                 st=private_code_obj.status
