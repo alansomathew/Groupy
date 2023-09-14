@@ -533,12 +533,12 @@ def check_and_reassign_rooms(request,event_id):
         pdata = ParticipateUser.objects.filter(events=event)
         roomdata = Room.objects.filter(events=event)
 
-        return render(request, "Organizer/allocation.html",{'data':pdata,'rdata':roomdata} )
+        return render(request, "Organizer/eventview.html",{"data":event,'mess':1}  )
     except Exception as e:
         print('hello')
         print(e)
         messages.error(request, 'No user is registered for this event!')
-        return render(request, "Organizer/allocation.html", )
+        return render(request, "Organizer/allocation.html",)
     
 def result(request, pk):
     event = Event.objects.get(id=pk)

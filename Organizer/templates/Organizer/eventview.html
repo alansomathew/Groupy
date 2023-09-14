@@ -52,6 +52,13 @@
             </tr>
         </table>
     </form>
+    {% if mess == 1 %}
+    <script>
+        alert("This Event is finished you can view the results");
+        window.location = "../../eventview/{{data.id}}";
+    </script>
+
+    {% endif %}
 </body>
 
 </html>
