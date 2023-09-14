@@ -89,6 +89,21 @@ def capacity(request):
     roomdata.save()
     return redirect("org:group")
 
+def change_capacity(request, event_id):
+    event = Event.objects.get(id=event_id)
+    rooms = Room.objects.filter(events=event)
+    
+    if request.method == "POST":
+        for key, value in request.POST.items():
+            if key.startswith("room_") and key.endswith("_capacity"):
+                room_number = key.split("_")[1]
+                room = Room.objects.get(events=event, number=room_number)
+                room.capacity = value
+                room.save()
+        return redirect('org:home')  # Redirect to a success page
+
+    return render(request, 'Organizer/group_edit.html', {'event': event, 'rooms': rooms})
+
 def eventview(request,eid):
     data=Event.objects.get(id=eid)
     return render(request,"Organizer/eventview.html",{'data':data})

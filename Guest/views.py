@@ -58,15 +58,35 @@ def participate(request):
                         # Check if the private code exists for the event
                         private_code_obj = PrivateCodes.objects.filter(event=event, code=private_code).first()
                         if private_code_obj:
+
+                            
                             # Check if a user with the same private code and username already exists
                             user_exists = ParticipateUser.objects.filter(privatecode=private_code, user=username).exists()
                             if user_exists:
                                 messages.warning(request, 'You have already registered for this event with the same private code.')
-                                return redirect("Guest:interest")
+                                ldata=ParticipateUser.objects.filter(user=username, events=event, privatecode=private_code).last()
+                                ids=event.id
+                                idm=ldata.id
+                                request.session["event_id"]=ids
+                                request.session["user_id"]=idm
+                                return redirect("Guest:change_interest")
                             else:
+                                st=private_code_obj.status
+                                if st:
+                                    messages.warning(request, 'The private code is already used.')
+                                    return render(request,"Guest/Event.html",)
                                 # Create a new participant
-                                ParticipateUser.objects.create(user=username, events=event, privatecode=private_code)
-                                messages.success(request, 'Registration successful.')
+                                else:
+                                    ParticipateUser.objects.create(user=username, events=event, privatecode=private_code)
+                                    private_code_obj.status=True
+                                    private_code_obj.save()
+                                    ldata=ParticipateUser.objects.filter(user=username, events=event, privatecode=private_code).last()
+                                    ids=event.id
+                                    idm=ldata.id
+                                    request.session["edata"]=ids
+                                    request.session["ldata"]=idm
+                                    messages.success(request, 'Registration successful.')
+                                    return redirect("Guest:interest")
                         else:
                             messages.error(request, 'Invalid private code for this event.')
                     else:
@@ -85,6 +105,7 @@ def participate(request):
 def interest(request):
     edata=Event.objects.get(id=request.session["edata"])
     gdata=Room.objects.filter(events=edata)
+   
     if request.method=="POST":
         pdata=ParticipateUser.objects.get(id=request.session["ldata"])
         pdata.rooms=request.POST.getlist('inte')
@@ -92,6 +113,24 @@ def interest(request):
         return redirect("Guest:participate")
     else:
         return render(request,"Guest/Group.html",{'data':gdata})
+    
+def change_interest(request):
+    edata=Event.objects.get(id=request.session["event_id"])
+    gdata=Room.objects.filter(events=edata)
+    user_record = ParticipateUser.objects.get(id=request.session["user_id"])
+    user_preferences = user_record.rooms 
+
+    context = {
+    'data': gdata,
+    'user_preferences': user_preferences
+}
+    if request.method=="POST":
+        pdata=ParticipateUser.objects.get(id=request.session["ldata"])
+        pdata.rooms=request.POST.getlist('inte')
+        pdata.save()
+        return redirect("Guest:participate")
+    else:
+        return render(request,"Guest/change_preference.html",context)
 
 def groups(request):
     ldata=ParticipateUser.objects.get(id=request.session["ldata"])

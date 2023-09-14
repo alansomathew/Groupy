@@ -20,4 +20,5 @@ urlpatterns = [
     path('mannual/<int:pk>', views.manuualy,name="manuualy"),
     path('viewcode/<int:pk>', views.view_code,name="view_code"),
     path('ajax/manual/', views.ajax_manual,name="ajax_manual"),
+    path('change_capacity/<int:event_id>/', views.change_capacity, name='change_capacity'),
 ]
