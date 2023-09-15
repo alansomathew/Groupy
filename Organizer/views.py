@@ -436,7 +436,7 @@ def check_and_reassign_rooms(request,event_id):
     roomdata = Room.objects.filter(events=event)
     try:
          # Set new_rooms to null for all users registered for this event
-        ParticipateUser.objects.filter(events=event).update(new_rooms="")
+        ParticipateUser.objects.filter(events=event).update(new_rooms="",is_ignored=False)
         # Call the check_and_reassign_rooms function with the event object
         # Get all the participating users for the event
         participating_users = ParticipateUser.objects.filter(events=event)
