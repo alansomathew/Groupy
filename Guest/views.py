@@ -125,7 +125,7 @@ def change_interest(request):
     'user_preferences': user_preferences
 }
     if request.method=="POST":
-        pdata=ParticipateUser.objects.get(id=request.session["ldata"])
+        pdata=ParticipateUser.objects.get(id=request.session["user_id"])
         pdata.rooms=request.POST.getlist('inte')
         pdata.save()
         return redirect("Guest:participate")
