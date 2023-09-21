@@ -611,3 +611,16 @@ def view_code(request,pk):
     return render(request,"Organizer/viewcode.html",{'data':data,'event':event})
    
 
+def add_capacity(request,pk):
+    event = Event.objects.get(id=pk)
+    if request.method=="POST":
+        new_cap=request.POST.get('capacity')
+        old_cap=event.tot_capacity
+        event.tot_capacity=int(new_cap)+int(old_cap)
+        event.save()
+        for i in range(int(new_cap)):
+            code = generate_code()
+            PrivateCodes.objects.create(event=event, code=code)
+        return redirect("org:view_code",pk=pk)
+    else:
+        return render(request,"Organizer/room_capacity.html",{'event':event})

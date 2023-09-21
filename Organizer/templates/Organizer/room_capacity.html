@@ -7,15 +7,15 @@
 
 <form method="post">
     {% csrf_token %}
-    <h3 class="text-center">Change capacity of Rooms</h3>
+    <h3 class="text-center">Change capacity of Event {{event.code}}</h3>
     <table align="center">
-        {% for room in rooms %}
+        
             <tr>
-                <td>{{ room.number }} Capacity:</td>
-                <td><input type="number" name="room_{{ room.number }}_capacity" value="{{ room.capacity }}" required></td>
+                <td> Capacity:</td>
+                <td><input type="number" name="capacity"  required></td>
             </tr>
            
-        {% endfor %}
+       
         <tr colspan="2">
             <td colspan="2" align="right"><input type="submit" value="Next" id="submit" name="btn"></td>
         </tr>

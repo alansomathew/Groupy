@@ -31,7 +31,7 @@
                         <select id="room_{{ user_data.id }}" name="room_{{ user_data.id }}"  onchange="onSelectChange(this.value, '{{ user_data.id }}')">
                             <option value="">Select Room</option>
                             {% for room in room %}
-                            <option value="{{ room.id }}" {% if user_data.new_rooms == room.number %}selected {% endif %}>
+                            <option value="{{ room.id }}" {% if user_data.new_rooms == room.number %}selected {% endif %} >
                                 {{ room.number }}
                             </option>
                             {% endfor %}
