@@ -621,6 +621,6 @@ def add_capacity(request,pk):
         for i in range(int(new_cap)):
             code = generate_code()
             PrivateCodes.objects.create(event=event, code=code)
-        return redirect("org:eventview",pk=pk)
+        return redirect("org:view_code",pk=pk)
     else:
         return render(request,"Organizer/room_capacity.html",{'event':event})
